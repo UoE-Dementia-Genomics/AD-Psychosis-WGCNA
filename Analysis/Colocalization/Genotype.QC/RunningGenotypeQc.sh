@@ -28,7 +28,7 @@ source $1
 module purge
 module load Python
 
-sh ${SCRIPTDIR}/1.QC.sh
+sh ${SCRIPTDIR}/1.QC.Main.sh
 
 module load R
 sh ${SCRIPTDIR}/2.CheckEthnicity.sh
@@ -37,7 +37,7 @@ sh ${SCRIPTDIR}/3.CheckRelatedness.sh
 
 module purge
 module load VCFtools
-sh ${SCRIPTDIR}/4.formatForImputation.sh ALL ${RefDir}/1000GP_Phase3_combined.legend
+sh ${SCRIPTDIR}/4.FormatForImputation.sh ALL ${RefDir}/1000GP_Phase3_combined.legend
 
 ## print finish date and time
 echo Job finished on:
