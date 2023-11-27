@@ -31,10 +31,10 @@ gwas.pvalue  <- args[18]
 qtl.pvalue <- args[19]
 soft.power <- args[20]
 
-source("Plotting/Plot.Coloc.Function.R")
-source("Plotting/colored.dendrogram.R")
-source("Plotting/EnrichmentPlot.function.R")
-source("Plotting/Methylation.Expression.CorrPlot.R")
+source("Plotting/ColocPlot.R")
+source("Plotting/ColoredDendrogram.R")
+source("Plotting/EnrichmentPlot.R")
+source("Plotting/MethylationExpressionCorrPlot.R")
 source("Plotting/ME.box.plot.R")
 source("Plotting/Merged.ModuleMembershipPlot.R")
 source("Plotting/ModulePreservationPlot.R")
