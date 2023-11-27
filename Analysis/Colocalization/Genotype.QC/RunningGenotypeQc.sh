@@ -23,7 +23,7 @@ date -u
 ######
 
 
-source $1
+source $1  # Genotype.config
 
 module purge
 module load Python
