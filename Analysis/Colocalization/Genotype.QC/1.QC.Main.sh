@@ -27,7 +27,7 @@ then
 	plink --bfile ${RAWDATADIR}/${FILEPREFIX} --missing --out QCoutput_${FILEPREFIX}/${FILEPREFIX}_duplicateSamples
 
 	## use python script to identify duplicated with greatest missingness
-	python ExcludeDuplicates.py QCoutput_${FILEPREFIX}/${FILEPREFIX}_king.con QCoutput_${FILEPREFIX}/${FILEPREFIX}_duplicateSamples.imiss QCoutput_${FILEPREFIX}/${FILEPREFIX}_dupsToExclude.txt
+	python DuplicatedSamples.py QCoutput_${FILEPREFIX}/${FILEPREFIX}_king.con QCoutput_${FILEPREFIX}/${FILEPREFIX}_duplicateSamples.imiss QCoutput_${FILEPREFIX}/${FILEPREFIX}_dupsToExclude.txt
 
 	## remove duplicates
 	plink --bfile ${RAWDATADIR}/${FILEPREFIX} --remove QCoutput_${FILEPREFIX}/${FILEPREFIX}_dupsToExclude.txt --make-bed --out QCoutput_${FILEPREFIX}/${FILEPREFIX}_update_1
