@@ -28,7 +28,7 @@ gcta64 --grm merge1KG_${FILEPREFIX}/${FILEPREFIX}_mergedw1000G --pca --out merge
 
 rm merge1KG_${FILEPREFIX}/${FILEPREFIX}_mergedw1000G*grm*
 
-Rscript ${SCRIPTDIR}/Pre-Imputation/plotEthnicity.r ${PROCESSDIR}  ${FILEPREFIX} ${RefDir} 
+Rscript ${SCRIPTDIR}/Pre-Imputation/PlotEthnicity.R ${PROCESSDIR}  ${FILEPREFIX} ${RefDir} 
 
 plink --bfile QCoutput_${FILEPREFIX}/${FILEPREFIX}_QCd --remove merge1KG_${FILEPREFIX}/${FILEPREFIX}_EthnicityOutliers.txt --make-bed --out QCoutput_${FILEPREFIX}/${FILEPREFIX}_QCd
 
