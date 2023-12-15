@@ -1,3 +1,4 @@
+setwd("C:/Users/mk693/OneDrive - University of Exeter/Desktop/2021/NIH/Brain EWAS Paper")
 library(vroom)
 library(stringr)
 library(ggplot2)
@@ -8,44 +9,49 @@ library(edgeR)
 library(cowplot)
 library(patchwork)
 
-args <- commandArgs(T)
+beta.pitts.regressed.file <- "WGCNA/mad.0.5.lm.v2.pow3/Pitts.All.Psycho.0.2.v2.lmCorrected.betas.rds"
+beta.bdr.regressed.file <- "BDR.data/BDR.All.Psycho.0.2.AD.braak.lmCorrected.betas.rds"
+pheno.pitts.file <- "WGCNA/mad.0.5.lm.v2.pow3/Pitts.All.Psycho.0.2.lmCorrected.pheno.csv"
+pheno.bdr.file <- "BDR.data/BDR.All.Psycho.0.2.AD.wgcna.pheno.csv"
+net.file <- "WGCNA/mad.0.5.lm.v2.pow3/Pitts.All.Psycho.0.2.v2.lmCorrected.wgcna.network.rds"
+preservation.file <- "WGCNA/mad.0.5.lm.v2.pow3/Pitts.BDR.All.Braak.max.1000.gold.1000_ModulePreservation.rds"
+expr.pitts.regressed.file="RNA-Seq/Pitts.Expr.Psycho.0.2.logCPM.lmCorrected.rds"
+cpg.darkred.file="WGCNA/mad.0.5.lm.v2.pow3/darkred/darkred.CpG.all.dist.1000.genes1.csv"
+enrichment.result.go.file="WGCNA/mad.0.5.lm.v2.pow3/Module.Enrichment/Missmethyl.gometh/darkred_GOEnrichment.csv"
+enrichment.result.kegg.file="WGCNA/mad.0.5.lm.v2.pow3/Module.Enrichment/Missmethyl.gometh/darkred_KeggEnrichment.csv"
+ppi.image.file="WGCNA/darkred.PPI.gometh.KEGG.png"
+coloc.qtl.file="WGCNA/mad.0.5.lm.v2.pow3/darkred/darkred.cis.QTL.0.001.ColocPlot2.csv"
+coloc.cpg.file="Coloc/Pitts.Psycho.0.2.CpGs.ColocPlot1.txt"
+gwas.SC.file="Coloc/Sum_stats/SC.2018.ColocPlot1.txt"
+gwas.EA.file="Coloc/Sum_stats/EA.Okbay.2022.ColocPlot1.txt"
+soft.power.data.file = "WGCNA/mad.0.5.lm.v2.pow3/Pitts.All.Psycho.0.2.v2.lmCorrected.wgcna.softThreshold.rds"
+ewce.result.file="EWCE.Cell.Enrichment/ewce.result.rds"
 
-beta.pitts.regressed.file <- args[1]
-beta.bdr.regressed.file <- args[2]
-pheno.pitts.file <- args[3]
-pheno.bdr.file <- args[4]
-net.file <- args[5]
-preservation.file <- args[6]
-expr.pitts.regressed.file <- args[7]
-cpg.darkred.file <- args[8]
-enrichment.result.go.file <- args[9]
-enrichment.result.kegg.file <- args[10]
-ppi.image.file <- args[11]
-coloc.qtl.file <- args[12]
-coloc.cpg.file <- args[13]
-gwas.SC.file <- args[14]
-gwas.EA.file <- args[16]
-soft.power.data.file <- args[17]
+gwas.pvalue  = 1e-5
+qtl.pvalue = 1e-5
+range = 5e+5
+gbuild = "hg19"
+congruence = F
+soft.power <- 3
 
-gwas.pvalue  <- args[18]
-qtl.pvalue <- args[19]
-soft.power <- args[20]
+source("Scripts/Plot.Coloc.Function.R")
+source("Scripts/colored.dendrogram.R")
+source("Scripts/EnrichmentPlot.function.R")
+source("Scripts/Methylation.Expression.CorrPlot.R")
+source("Scripts/ME.box.plot.R")
+source("Scripts/Merged.ModuleMembershipPlot.R")
+source("Scripts/ModulePreservationPlot.R")
+source("Scripts/ModuleMembershipPlot.R")
+source("Scripts/WGCNA.SoftPower.Plot.R")
+source("Scripts/EWCE.Plot.R")
 
-source("Plotting/ColocPlot.R")
-source("Plotting/ColoredDendrogram.R")
-source("Plotting/EnrichmentPlot.R")
-source("Plotting/MethylationExpressionCorrPlot.R")
-source("Plotting/ME.box.plot.R")
-source("Plotting/Merged.ModuleMembershipPlot.R")
-source("Plotting/ModulePreservationPlot.R")
-source("Plotting/ModuleMembershipPlot.R")
-source("Plotting/WGCNA.SoftPower.Plot.R")
-
-enrichment.go <- read.csv(enrichment.result.go.file) # names(enrichment.go) <- c("ID","Ontology","Term","Size","Overlap","Pvalue","FDR","Significant.Genes.In.Term")
+enrichment.go <- read.csv(enrichment.result.go.file)
+names(enrichment.go) <- c("ID","Ontology","Term","Size","Overlap","Pvalue","FDR","Significant.Genes.In.Term")
 enrichment.go.cc <- enrichment.go[enrichment.go$Ontology=="CC",]
 enrichment.go.bp <- enrichment.go[enrichment.go$Ontology=="BP",]
 enrichment.go.mf <- enrichment.go[enrichment.go$Ontology=="MF",]
-enrichment.kegg <- read.csv(enrichment.result.kegg.file) #names(enrichment.kegg) <- c("ID","Description","Size","Overlap","Pvalue","FDR","Significant.Genes.In.Term")
+enrichment.kegg <- read.csv(enrichment.result.kegg.file)
+names(enrichment.kegg) <- c("ID","Description","Size","Overlap","Pvalue","FDR","Significant.Genes.In.Term")
 ppi.image <- readPNG(source = ppi.image.file)
 
 coloc.qtl <- vroom(file = coloc.qtl.file,col_types = list(snp='c'))
@@ -100,9 +106,17 @@ blankPlot <- ggplot()+geom_blank(aes(1,1))+
     axis.line = element_blank()
   )
 
+ewce.result <- readRDS(ewce.result.file)
 #####################################################################
+#source("Scripts/CategoricalBoxPlot.R")
+#merged.box.plot <- categorical.box.plot(expression = beta.merged,phenotype = pheno.merged,
+#                category.col = "Psychosis",genes = names(net$colors[net$colors=="darkred"]),method = "mean",y.lab = "Average of beta values in the darkred module",
+#                title = "",facet.col = "cohort",category.labels = c("AD-P","AD+P"))
+
+
 merged.box.plot <- ME.box.plot(expression1 = beta.pitts.regressed,expression2 = beta.bdr.regressed,colors = net$colors,soft.power = soft.power,phenotype1 = pheno.pitts,
                                phenotype2 = pheno.bdr,category.col = "Psychosis",modules = "darkred",facet.col = "cohort",category.labels = c("AD-P","AD+P"))
+merged.box.plot <- merged.box.plot$darkred
 #####################################################################
 
 merged.mm.plot <- Merged.Module.Membership.Plot(net.colors = net$colors,expr.mat1 = beta.pitts.regressed,expr.mat2 = beta.bdr.regressed,
@@ -113,17 +127,27 @@ merged.mm.plot <- Merged.Module.Membership.Plot(net.colors = net$colors,expr.mat
 merged.mm.plot <- merged.mm.plot$darkred
 #####################################################################
 
-preserv.plot <- module.preservation.plot(MP.Data = mp, Modules = c("mediumpurple3","firebrick3",
+preserv.plot <- module.preservation.plot(MP.Data = mp, Modules = c("mediumpurple3",
+                                                                   #"magenta1",
+                                                                   "firebrick3",
+                                                                   #"lightcoral",
+                                                                   #"lightcyan",
                                                                    "darkgoldenrod1",
+                                                                   #"green4",
+                                                                   #"linen",
+                                                                   #"mistyrose",
+                                                                   #"seashell4",
+                                                                  # "antiquewhite",
+                                                                   #"moccasin",
+                                                                   #"greenyellow",
                                                                    "darkred",
                                                                    "lightblue1"),title.medrank = "",title.zsummary = "" )
 preserv.plot.med.rank <- preserv.plot$Plot.Med.Rank
 preserv.plot.z.summary <- preserv.plot$Plot.Z.Summary
 
 #####################################################################
-tiff(filename = "Fig2_WGCNA.darkred1.tif",units = "in",height = 10,width = 12,res = 500)
-ggarrange(merged.box.plot, merged.mm.plot, preserv.plot.z.summary, 
-          preserv.plot.med.rank,nrow = 2,ncol = 2,labels = c("A","B","C","D"))
+tiff(filename = "WGCNA.Paper/Figures/Fig2_WGCNA.darkred1.tif",units = "in",height = 10,width = 12,res = 500)
+ggarrange(preserv.plot.z.summary, preserv.plot.med.rank,merged.box.plot, merged.mm.plot, nrow = 2,ncol = 2,labels = c("A","B","C","D"))
 
 graphics.off()
 
@@ -148,35 +172,39 @@ plot.ppi <- ggplot(data = df,aes(x,y,fill=z))+
         axis.title = element_blank(),axis.text = element_blank(),axis.ticks = element_blank(),
         legend.key=element_rect(fill="white"),legend.text = element_text(size = 6),
         legend.title = element_text(size = 6))
+ewc.plot <- EWCE.Plot(EWCE.result = ewce.result,q.threshold = 0.05)
 
-tiff(filename = "Fig3_PPI.enrichment.darkred.tif",units = "in",height = 8,width = 18,res = 500)
-ggarrange(ggarrange(plot.kegg,plot.go.bp,plot.go.mf,plot.go.cc,labels = c("A","B","C","D"),nrow = 2,ncol = 2,common.legend = T,legend = "right"),
-          plot.ppi,labels = c("","E"),nrow = 1,ncol = 2, heights = c(1.5,2),widths = c(1.5,2))
+GO.KEGG.Plot <- ggarrange(plot.go.bp,plot.go.mf,plot.go.cc,plot.kegg,labels = c("A","B","C","D"),nrow = 2,ncol = 2,common.legend = T,legend = "right")
+EWC_ <- ggarrange(blankPlot,ewc.plot,blankPlot,nrow = 1,ncol = 3,labels = c("","F",""), widths = c(1,1.5,1))
+GO.KEGG.EWC <- ggarrange(GO.KEGG.Plot,EWC_,nrow = 2, ncol = 1,heights = c(1.5,1))
+
+tiff(filename = "WGCNA.Paper/Figures/Fig3_PPI.enrichment.darkred.tif",units = "in",height = 10,width = 20,res = 500)
+ggarrange(GO.KEGG.EWC,plot.ppi,labels = c("","E"),nrow = 1,ncol = 2, heights = c(1.5,2),widths = c(1.5,2))
 graphics.off()
 
 ##################################################################################
 
 result <- plot.coloc(GWAS.df = gwas.SC,QTL.df = coloc.qtl,Genes.df = coloc.cpg,gene ="cg06158994" ,trait = "Schizophrenia",
-                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = 5e+5,gbuild = "hg19",
+                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = range,gbuild = gbuild,
                      congruence = congruence,Return.CSV= F)
 
 plot.scz1 <- result$plot.coloc
 
 
 result <- plot.coloc(GWAS.df = gwas.SC,QTL.df = coloc.qtl,Genes.df = coloc.cpg,gene ="cg19882179" ,trait = "Schizophrenia",
-                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = 5e+5,gbuild = "hg19",
+                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = range,gbuild = gbuild,
                      congruence = congruence,Return.CSV=F)
 
 plot.scz2 <- result$plot.coloc
 
 
 result <- plot.coloc(GWAS.df = gwas.EA,QTL.df = coloc.qtl,Genes.df = coloc.cpg,gene ="cg17252645" ,trait = "Educational Attainment",
-                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = 5e+5,gbuild = "hg19",
+                     GWAS.SigPvalue = gwas.pvalue,QTL.SigPvalue = qtl.pvalue,rangebp = range,gbuild = gbuild,
                      congruence = congruence,Return.CSV=F)
 
 plot.EA1 <- result$plot.coloc
 
-tiff(filename = "Fig4.darkred.Coloc.tif",units = "in",height = 14,width = 20,res = 500)
+tiff(filename = "WGCNA.Paper/Figures/Fig4.darkred.Coloc11.tif",units = "in",height = 14,width = 20,res = 500)
 ggarrange(ggarrange(plot.scz1,plot.scz2,nrow = 1,ncol = 2,labels = c("A","B")),
           ggarrange(blankPlot,plot.EA1,blankPlot,nrow = 1,ncol = 3,widths = c(1,3.2,0.75),labels = c("","C","")),
           nrow = 2,ncol = 1)
@@ -190,23 +218,29 @@ cor.plots <- methylation.expression.corr(data.methylation = beta.pitts.regressed
             phenotype = pheno.pitts, trait = "Psychosis", trait.labels = c("AD-P","AD+P"), return.csv = return.csv)
 if(return.csv){
   results.csv <- cor.plots$cpg.gene.list
-  write.csv(results.csv,file = "Fig5_darkred.Methyl-Expr.Corr.spearman.regressed.csv", row.names = F)
+  write.csv(results.csv,file = "WGCNA.Paper/Figures/Fig5_darkred.Methyl-Expr.Corr.spearman.regressed.csv", row.names = F)
   cor.plots <- cor.plots$plots
 }
 
-tiff(filename = "Fig5_darkred.Methyl-Expr.Corr.Pearson.regressed.tif",units = "in",height = 8,width = 10,res = 500)
+tiff(filename = "WGCNA.Paper/Figures/Fig5_darkred.Methyl-Expr.Corr.Pearson.regressed.tif",units = "in",height = 8,width = 10,res = 500)
 ggarrange(cor.plots[[1]],cor.plots[[2]],nrow = 2,ncol = 1)
 graphics.off()
 
 #######################################################################################
 soft.power.data <- readRDS(soft.power.data.file)
 colnames(beta.pitts.regressed) <- pheno.pitts$Individual_ID
+#rownames(pheno.pitts) <- pheno.pitts$Individual_ID
+#pheno.pitts$Psychosis[pheno.pitts$Psychosis==2] = "AD+P"
+#pheno.pitts$Psychosis[pheno.pitts$Psychosis==0] = "AD-P"
+#p.dend <- colored.dendrogram(expression = beta.pitts.regressed,plot.font.size = 0.8,phenotype = pheno.pitts,
+#                             color.column = "Psychosis",legend.title = "Group", Colors = c("darkred" , "darkblue"),legend.x = 140,
+#                             legend.y = 40, plot.title = "Samples dendrogram")
 p.dend <- colored.dendrogram(expression = beta.pitts.regressed)
 p.soft <- soft.power.plot(soft.data = soft.power.data,select.pow = 3)
 p.scale.free <- p.soft$p.scale.free
 p.mean.connect <- p.soft$p.mean.connect
 
-tiff(filename = "SuppFig1.dendrogram.tif",units = "in",height = 15,width = 22,res = 500)
+tiff(filename = "WGCNA.Paper/Figures/SuppFig1.dendrogram.tif",units = "in",height = 15,width = 22,res = 500)
 ggarrange(p.dend , ggarrange(blankPlot,p.scale.free , p.mean.connect ,blankPlot, nrow = 1 , ncol = 4, labels = c("","B","C","")) , 
           nrow = 2 , ncol = 1, heights = c(2,1),labels =c("A","") )
 graphics.off()
@@ -214,6 +248,8 @@ graphics.off()
 mm.plots <- Module.Membership.Plot(net.colors = net$colors,expr.mat = beta.pitts.regressed,trait = data.frame(Psychosis=pheno.pitts$Psychosis),
                        modules = c("firebrick3","mediumpurple3","lightblue1","darkgoldenrod1","darkred"),size.threshold = 1500,soft.power = 3,return.members = F,plot.title = "")
 
+  #mm.plots <- Module.Membership.Plot(net.colors = net$colors,expr.mat = beta.pitts.regressed,trait = data.frame(Psychosis=pheno.pitts$Psychosis),
+ #                                  modules = "darkred",size.threshold = 1500,soft.power = 3,return.members = F,plot.title = "",selected.genes = c("cg05964505","cg14502713"))
 
 merged.box.plot <- ME.box.plot(expression1 = beta.pitts.regressed,colors = net$colors,soft.power = soft.power,phenotype1 = pheno.pitts,plot.title = "",y.lab = "Module Eigengene",
                                category.col = "Psychosis",modules = c("firebrick3","mediumpurple3","lightblue1","darkgoldenrod1","darkred"),category.labels = c("AD-P","AD+P"))
@@ -229,8 +265,7 @@ p4 <- merged.box.plot$darkgoldenrod1 + mm.plots$darkgoldenrod1+ plot_annotation(
 p5 <- merged.box.plot$darkred + mm.plots$darkred+ plot_annotation(title = "darkred")+
   plot_layout(guides = "collect")& theme(legend.position = 'non')
 
-tiff(filename = "SuppFig2.other.modules.tif",units = "in",height = 14,width = 18,res = 500)
+tiff(filename = "WGCNA.Paper/Figures/SuppFig2.other.modules.tif",units = "in",height = 14,width = 18,res = 500)
+#ggarrange(mm.plots[[1]],mm.plots[[2]],mm.plots[[3]],mm.plots[[4]],nrow = 2,ncol = 2)
 ggarrange(p1,p2,p3,p4,p5,nrow = 3,ncol = 2,common.legend = T)
 graphics.off()
-
-
