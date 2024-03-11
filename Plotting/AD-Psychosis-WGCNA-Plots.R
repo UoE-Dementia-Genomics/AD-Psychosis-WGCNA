@@ -27,6 +27,7 @@ gwas.EA.file="Coloc/Sum_stats/EA.Okbay.2022.ColocPlot1.txt"
 soft.power.data.file = "WGCNA/mad.0.5.lm.v2.pow3/Pitts.All.Psycho.0.2.v2.lmCorrected.wgcna.softThreshold.rds"
 ewce.result.file="EWCE.Cell.Enrichment/ewce.result.rds"
 
+
 gwas.pvalue  = 1e-5
 qtl.pvalue = 1e-5
 range = 5e+5
@@ -221,9 +222,14 @@ if(return.csv){
   write.csv(results.csv,file = "WGCNA.Paper/Figures/Fig5_darkred.Methyl-Expr.Corr.spearman.regressed.csv", row.names = F)
   cor.plots <- cor.plots$plots
 }
+load(ctd.file)
+ARMC3 <- EWCE.Plot.ctd(ctd = ctd , genes = "ARMC3",metric = "mean_exp",level =1)
+PNPLA7 <- EWCE.Plot.ctd(ctd = ctd , genes = "PNPLA7",metric = "mean_exp",level =1)
 
 tiff(filename = "WGCNA.Paper/Figures/Fig5_darkred.Methyl-Expr.Corr.Pearson.regressed.tif",units = "in",height = 8,width = 10,res = 500)
-ggarrange(cor.plots[[1]],cor.plots[[2]],nrow = 2,ncol = 1)
+ggarrange(ggarrange(cor.plots[[1]]$methyl,cor.plots[[1]]$expr,cor.plots[[1]]$corr,
+          cor.plots[[2]]$methyl,cor.plots[[2]]$expr,cor.plots[[2]]$corr,nrow = 2,ncol = 3,common.legend = T,legend = "none",labels = c("A","C","E","B","D","F")),
+          ggarrange(ARMC3 , PNPLA7,nrow = 2,ncol = 1,common.legend = T,labels = c("G","H"),legend = "right"),nrow = 1,ncol = 2,widths = c(3,1))
 graphics.off()
 
 #######################################################################################
