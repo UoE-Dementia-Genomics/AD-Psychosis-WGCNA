@@ -29,45 +29,60 @@ methylation.expression.corr <- function(data.methylation,data.expression,correla
   cpg.gene.list$Padj <- p.adjust(cpg.gene.list$Pvalue,method = "BH")
   cpg.gene.list <- cpg.gene.list[order(cpg.gene.list$Pvalue,decreasing = F),]
   
-  result.plot <- vector(mode = "list",length = 10)
-  names(result.plot) <- paste0(cpg.gene.list$cpg[1:10],".",cpg.gene.list$gene.symbol[1:10])
+  result.plot <- vector(mode = "list",length = No.Pairs.in.Plot)
+  names(result.plot) <- paste0(cpg.gene.list$cpg[1:No.Pairs.in.Plot],".",cpg.gene.list$gene.symbol[1:No.Pairs.in.Plot])
   for (i in 1:No.Pairs.in.Plot) {
     data = cbind.data.frame(as.numeric(data.methylation[cpg.gene.list$cpg[i],]),as.numeric(data.expression[cpg.gene.list$gene.ensembl[i],]))
     names(data) = c("Methylation","Expression")
     rownames(data) = colnames(data.expression)
     data$trait = as.factor(phenotype[,trait])
-  
-  p1 <- ggplot(data = data, aes(x = Methylation, y = Expression)) + geom_point() + 
+    
+    x.txt.pos <- min(data$Methylation) + ((max(data$Methylation)-min(data$Methylation))/50)
+    y.txt.pos <- min(data$Expression) + ((max(data$Expression)-min(data$Expression))/8)
+    
+    p1 <- ggplot(data = data, aes(x = Methylation, y = Expression)) + geom_point() + 
       geom_smooth(method = "lm", se = T) + theme_bw()+
-      ggtitle("")+xlab("Methylation \n(normalized beta value)")+
-      ylab("Expression \n(logCPM)")+
-     theme(axis.title = element_text(size = 8))
+      ggtitle("")+xlab(paste(cpg.gene.list$cpg[i],"Methylation \n(normalized beta value)"))+
+      ylab(paste(cpg.gene.list$gene.symbol[i],"Expression \n(logCPM)"))+
+      #ggtitle(paste0("Correlation=",round(cpg.gene.list$Correlation[i],digits = 2),
+       #              " , Pvalue=",formatC(cpg.gene.list$Pvalue[i],format = "e",digits = 2)))+
+      geom_text(x = x.txt.pos, y = y.txt.pos, label = paste(sep = "", "corr = ", round(cpg.gene.list$Correlation[i], 2), "\np = ", 
+                    formatC(cpg.gene.list$Pvalue[i], format = "e", digits = 2)), hjust = 0, vjust = 1, size=3) +
+      theme(axis.title = element_text(size = 8),title = element_text(size = 8))
   
-   p2 <- ggplot(data = data, aes(x=trait, y=Methylation,fill=trait)) +
+    p2 <- ggplot(data = data, aes(x=trait, y=Methylation,fill=trait)) +
      geom_boxplot() +
      guides(fill=guide_legend(title=trait))+
      scale_fill_manual(values = c("#01BEC3","#F8756D"),labels=trait.labels)+
      geom_jitter(color="black", size=0.8, alpha=0.9) +
      ggtitle("") +
-     xlab(trait)+ylab("Methylation \n(normalized beta value)") +
+     xlab(trait)+ylab(paste(cpg.gene.list$cpg[i],"Methylation \n(normalized beta value)")) +
      scale_x_discrete(labels=trait.labels)+
      theme_bw()+theme(axis.title = element_text(size = 8))
   
-   p3 <- ggplot(data = data, aes(x=trait, y=Expression,fill=trait)) +
+    p3 <- ggplot(data = data, aes(x=trait, y=Expression,fill=trait)) +
      geom_boxplot() +
      guides(fill=guide_legend(title=trait))+
      scale_fill_manual(values = c("#01BEC3","#F8756D"),labels=trait.labels)+
      geom_jitter(color="black", size=0.8, alpha=0.9) +
      ggtitle("") +
-     xlab(trait)+ylab("Expression \n(logCPM)") +
+     xlab(trait)+ylab(paste(cpg.gene.list$gene.symbol[i],"Expression \n(logCPM)")) +
      scale_x_discrete(labels=trait.labels)+
      theme_bw()+theme(axis.title = element_text(size = 8))
    
-   p4 <- p2+p3+p1+plot_annotation(title = paste0(cpg.gene.list$cpg[i],"-",cpg.gene.list$gene.symbol[i],
-                                                 " (Correlation=",round(cpg.gene.list$Correlation[i],digits = 2),
-                                                 " , Pvalue=",formatC(cpg.gene.list$Pvalue[i],format = "e",digits = 2),")"))+
-     plot_layout(guides = "collect") & theme(legend.position = 'non')
-   result.plot[[i]] <- p4
+    p4 <- p2+p3+p1+
+      #plot_annotation(title = paste0(cpg.gene.list$cpg[i],"-",cpg.gene.list$gene.symbol[i],
+                    #                             " (Correlation=",round(cpg.gene.list$Correlation[i],digits = 2),
+                     #                            " , Pvalue=",formatC(cpg.gene.list$Pvalue[i],format = "e",digits = 2),")"))+
+      plot_layout(guides = "collect") & theme(legend.position = 'non')
+    
+    result.plot[[i]] <- list(corr=p1,methyl=p2,expr=p3,merged=p4)
+    #p4 <- vector(mode = "list",length = 2)
+    #names(p4) <- c(cpg.gene.list$cpg[i],cpg.gene.list$gene.symbol[i])
+    #p4[[1]] <- p2
+    #p4[[2]] <- p3
+    #result.plot[[i]]$scatter <- p1
+    #result.plot[[i]]$box <- p4
   
   }
   if(return.csv){
