@@ -21,6 +21,8 @@ module.preservation.plot <- function(MP.Data , Modules,title.medrank="",title.zs
     theme(legend.position = "none")+scale_y_reverse() #(n.breaks =6,limits = c(12,0))
   
   # plot Z summary
+  ylim_ <- c(-1 , round(max(PlotData$Zsummary),digits = 0)+5)
+  xlim_ <- c(-50 , max(PlotData$moduleSizes)+100)
   p2 <- ggplot(PlotData, aes(moduleSizes, Zsummary,label=modColors,colour = modColors)) +         
     geom_point(size = 10)+
     scale_colour_manual(values=PlotData$modColors)+
@@ -29,9 +31,8 @@ module.preservation.plot <- function(MP.Data , Modules,title.medrank="",title.zs
     theme(legend.position = "none")+geom_hline(yintercept=0, color = "black")+
     geom_hline(yintercept=5, linetype="dashed", color = "blue")+
     geom_hline(yintercept=10, linetype="dashed", color = "red") +
-    scale_y_continuous(n.breaks = 8,limits = c(0,35))+
-    scale_x_continuous(n.breaks = 6,limits = c(-100,1200))
+    scale_y_continuous(n.breaks = 8,limits = ylim_)+
+    scale_x_continuous(n.breaks = 6,limits = xlim_)
   
   return(list(Plot.Med.Rank=p1 , Plot.Z.Summary=p2))
 }
-
