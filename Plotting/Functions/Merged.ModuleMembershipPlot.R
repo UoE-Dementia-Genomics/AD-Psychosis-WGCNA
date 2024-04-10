@@ -82,7 +82,7 @@ Merged.Module.Membership.Plot <- function(net.colors, expr.mat1, expr.mat2, trai
                     formatC(c1$p.value, format = "e", digits = 2)),color = "steelblue", hjust = 0, vjust = 1) + 
           geom_text(x = 0, y = max(c(plot.data1$y,plot.data2$y)), label = paste(sep = "", "corr = ", round(c2$estimate, 2), ", p = ", 
                    formatC(c2$p.value, format = "e", digits = 2)),color = "darkred", hjust = 0, vjust = 1)+
-          theme(panel.background = element_blank(),panel.border = element_rect(fill = NA),legend.key = element_rect(fill = "white"))
+          theme(panel.background = element_blank(),panel.border = element_rect(fill = NA),legend.key = element_rect(fill = "white", colour = "white"))
       
     
     result[[i]] <- p
@@ -90,5 +90,3 @@ Merged.Module.Membership.Plot <- function(net.colors, expr.mat1, expr.mat2, trai
   }
   return(result)
 }
-
-
