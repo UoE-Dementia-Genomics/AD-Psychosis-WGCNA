@@ -44,6 +44,8 @@ methylation.expression.corr <- function(data.methylation,data.expression,correla
       geom_smooth(method = "lm", se = T) + theme_bw()+
       ggtitle("")+xlab(paste(cpg.gene.list$cpg[i],"Methylation \n(normalized beta value)"))+
       ylab(paste(cpg.gene.list$gene.symbol[i],"Expression \n(logCPM)"))+
+      #ggtitle(paste0("Correlation=",round(cpg.gene.list$Correlation[i],digits = 2),
+       #              " , Pvalue=",formatC(cpg.gene.list$Pvalue[i],format = "e",digits = 2)))+
       geom_text(x = x.txt.pos, y = y.txt.pos, label = paste(sep = "", "corr = ", round(cpg.gene.list$Correlation[i], 2), "\np = ", 
                     formatC(cpg.gene.list$Pvalue[i], format = "e", digits = 2)), hjust = 0, vjust = 1, size=3) +
       theme(axis.title = element_text(size = 8),title = element_text(size = 8))
@@ -69,9 +71,18 @@ methylation.expression.corr <- function(data.methylation,data.expression,correla
      theme_bw()+theme(axis.title = element_text(size = 8))
    
     p4 <- p2+p3+p1+
+      #plot_annotation(title = paste0(cpg.gene.list$cpg[i],"-",cpg.gene.list$gene.symbol[i],
+                    #                             " (Correlation=",round(cpg.gene.list$Correlation[i],digits = 2),
+                     #                            " , Pvalue=",formatC(cpg.gene.list$Pvalue[i],format = "e",digits = 2),")"))+
       plot_layout(guides = "collect") & theme(legend.position = 'non')
     
     result.plot[[i]] <- list(corr=p1,methyl=p2,expr=p3,merged=p4)
+    #p4 <- vector(mode = "list",length = 2)
+    #names(p4) <- c(cpg.gene.list$cpg[i],cpg.gene.list$gene.symbol[i])
+    #p4[[1]] <- p2
+    #p4[[2]] <- p3
+    #result.plot[[i]]$scatter <- p1
+    #result.plot[[i]]$box <- p4
   
   }
   if(return.csv){
