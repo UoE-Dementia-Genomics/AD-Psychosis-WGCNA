@@ -36,10 +36,10 @@ gbuild = "hg19"
 congruence = F
 soft.power <- 3
 
-source("Scripts/Plot.Coloc.Function.R")
-source("Scripts/colored.dendrogram.R")
-source("Scripts/EnrichmentPlot.function.R")
-source("Scripts/Methylation.Expression.CorrPlot.R")
+source("Scripts/ColocPlot.R")
+source("Scripts/ColoredDendrogram.R")
+source("Scripts/EnrichmentPlot.R")
+source("Scripts/MethylationExpressionCorrPlot.R")
 source("Scripts/ME.box.plot.R")
 source("Scripts/Merged.ModuleMembershipPlot.R")
 source("Scripts/ModulePreservationPlot.R")
