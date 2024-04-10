@@ -16,6 +16,8 @@ cis.pval <- args[5]
 cis.pval <- as.numeric(cis.pval)
 trans.pval <- args[6]
 trans.pval <- as.numeric(trans.pval)
+trans.cross.chr <- ifelse(tolower(args[7])=="yes",T,F)
+
 flag1=FALSE
 flag2=FALSE
 
@@ -26,6 +28,7 @@ print(paste0("  CHR: ",chr))
 print(paste0("  cis distance: ",Dist))
 print(paste0("  cis Pvalue: ",cis.pval))
 print(paste0("  trans Pvalue: ",trans.pval))
+print(paste0("  Get the trans results in cross chromosom mode? ",ifelse(trans.cross.chr,"Yes","No")))
 
 # Matrix eQTL by Andrey A. Shabalin
 # http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/
@@ -42,7 +45,12 @@ useModel = modelLINEAR; # modelANOVA, modelLINEAR, or modelLINEAR_CROSS
 
 # Covariates file name
 # Set to character() for no covariates
-covariates_file_name = paste0(FilePrefix,"_covariates.txt")
+if(file.exists(paste0(FilePrefix,".covariates.txt"))){
+  covariates_file_name = paste0(FilePrefix,".covariates.txt")
+}else{
+  covariates_file_name = character()
+}
+
 
 # Error covariance matrix
 # Set to numeric() for identity.
@@ -55,21 +63,19 @@ pvOutputThreshold_tra = trans.pval;
 cisDist = Dist;
   
 # Genotype file name
-SNP_file_name = paste0(FilePrefix,"_snps_chr",chr,".txt")
+SNP_file_name = paste0(FilePrefix,".snps.chr",chr,".txt")
 
 # Gene expression file name
-expression_file_name = paste0(FilePrefix,"_exp.txt")
+expression_file_name = paste0(FilePrefix,".exp.txt")
 
 # Only associations significant at this level will be saved
 
-snps_location_file_name =paste0(FilePrefix,"_snps_loc_chr",chr,".txt") ;
+snps_location_file_name =paste0(FilePrefix,".snps.loc.chr",chr,".txt") ;
 
-gene_location_file_name = paste0(FilePrefix,"_gene_loc.txt");
+gene_location_file_name = paste0(FilePrefix,".gene.loc.txt");
 
 
 # Output file name
-
-
 
 
 ## Load genotype data
@@ -98,26 +104,33 @@ error=function(e){
   flag2 <<- TRUE
   })
 ## Load covariates
-
-cvrt = SlicedData$new();
-cvrt$fileDelimiter = "\t";      # the TAB character
-cvrt$fileOmitCharacters = "NA"; # denote missing values;
-cvrt$fileSkipRows = 1;          # one row of column labels
-cvrt$fileSkipColumns = 1;       # one column of row labels
-if(length(covariates_file_name)>0) {
-  cvrt$LoadFile(covariates_file_name);
-}
-
+tryCatch(expr = {
+  cvrt = SlicedData$new();
+  cvrt$fileDelimiter = "\t";      # the TAB character
+  cvrt$fileOmitCharacters = "NA"; # denote missing values;
+  cvrt$fileSkipRows = 1;          # one row of column labels
+  cvrt$fileSkipColumns = 1;       # one column of row labels
+  if(length(covariates_file_name)>0) {
+    cvrt$LoadFile(covariates_file_name);
+  }
+},
+error=function(e){
+  print("An error occured during reading the covariates file")
+})
 ## Run the analysis
 if((!flag1)&(!flag2)){
-  dir.create(paste0(FilePrefix,"_matrixEQTL_chr",chr))
+  dir.create(paste0(FilePrefix,".matrixEQTL.chr",chr))
   
-  output_file_name_cis =paste0(FilePrefix,"_matrixEQTL_chr",chr,paste0("/",FilePrefix,"_matrixEQTL_cis_chr",chr,".out"))
-  output_file_name_tra = paste0(FilePrefix,"_matrixEQTL_chr",chr,paste0("/",FilePrefix,"_matrixEQTL_tra_chr",chr,".out"))
+  output_file_name_cis =paste0(FilePrefix,".matrixEQTL.chr",chr,paste0("/",FilePrefix,".matrixEQTL.cis.chr",chr,".out"))
+  output_file_name_tra = paste0(FilePrefix,".matrixEQTL.chr",chr,paste0("/",FilePrefix,".matrixEQTL.trans.chr",chr,".out"))
   
   snpspos = read.table(snps_location_file_name, header = TRUE, stringsAsFactors = FALSE);
   genepos = read.table(gene_location_file_name, header = TRUE, stringsAsFactors = FALSE);
-  
+  if(!trans.cross.chr){
+    index <- which(genepos$chr==chr)
+    genepos <- genepos[index,]
+    expression$RowReorder(index)
+  }
   me = Matrix_eQTL_main(
     snps = snps,
     gene = expression,
@@ -140,8 +153,8 @@ if((!flag1)&(!flag2)){
   unlink(output_file_name_cis);
   
   ## Results:
-  save(me,file=paste0(FilePrefix,"_matrixEQTL_chr",chr,paste0("/",FilePrefix,"_matrixEQTL_chr",chr,".RData")))
-  print(paste("result saved in",paste0(FilePrefix,"_matrixEQTL_chr",chr,paste0("/",FilePrefix,"_matrixEQTL_chr",chr,".RData"))))
+  save(me,file=paste0(FilePrefix,".matrixEQTL.chr",chr,paste0("/",FilePrefix,".matrixEQTL.chr",chr,".RData")))
+  print(paste("result saved in",paste0(FilePrefix,".matrixEQTL.chr",chr,paste0("/",FilePrefix,".matrixEQTL.chr",chr,".RData"))))
   cat('Analysis done in: ', me$time.in.sec, ' seconds', '\n')
 }else{
   if(flag1)
@@ -149,18 +162,3 @@ if((!flag1)&(!flag2)){
   if(flag2)
     print(paste("Loading expression data for chr",chr,"was failed (probabily there is no expression data)"))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
