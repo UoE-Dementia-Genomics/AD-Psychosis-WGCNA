@@ -42,7 +42,7 @@ ME.box.plot <- function(expression1,expression2=NA, phenotype1, phenotype2=NA ,s
     }
     
     if(!is.na(facet.col)){
-      phenotype$f_ <- c(phenotype1[,facet.col],phenotype2[,facet.col])
+      phenotype$f_ <- factor(c(phenotype1[,facet.col],phenotype2[,facet.col]), levels = c(unique(phenotype1[,facet.col]),unique(phenotype2[,facet.col])))
     }
     p <- ggplot(data = phenotype,aes(x=x_,y=y_, fill=x_))+ 
       theme(plot.title = element_text(hjust = 0.5)) +
@@ -55,6 +55,9 @@ ME.box.plot <- function(expression1,expression2=NA, phenotype1, phenotype2=NA ,s
       guides(fill=guide_legend(title=category.col)) + 
       theme_bw()+
       theme(plot.title = element_text(hjust = 0.5))
+    
+    ylim1 = boxplot.stats(phenotype$y_)$stats[c(1, 5)]
+    p = p + coord_cartesian(ylim = ylim1*1.5)
     
     if(is.na(plot.title)){
       p <- p + ggtitle(module)
@@ -69,5 +72,3 @@ ME.box.plot <- function(expression1,expression2=NA, phenotype1, phenotype2=NA ,s
   }
   return(results)
 }
-
-
