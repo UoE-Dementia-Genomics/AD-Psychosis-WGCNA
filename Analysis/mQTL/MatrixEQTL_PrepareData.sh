@@ -1,4 +1,5 @@
 #!/bin/bash
+#SBATCH -A Research_Project-MRC164847 # research project to submit under.
 #SBATCH --export=ALL # export all environment variables to the batch job.
 #SBATCH -D . # set working directory to .
 #SBATCH -p mrcq
@@ -7,34 +8,57 @@
 #SBATCH --ntasks-per-node=16 # specify number of processors.
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
-#SBATCH --output=%x.%j.out
-#SBATCH --error=%x.%j.err
 
-### print start date and time
+### print start date and time 
 echo Job started on:
 date -u
+echo ""
+####### 
 
-SCRIPTDIR=./Scripts/mQTL
-InDir=./WGCNA/mQTL
-OutDir=./WGCNA/mQTL/darkred.mQTL.results
-covar_fact=Sex,TissueType,Plate,BraakStage
-covar_num=Age,CellProportion
-FilePrefix=darkred
+SCRIPTDIR=./Analysis/mQTL
+InDir=./mQTL_Inputs
+OutDir=./mQTL_Results
+FilePrefix=darkgreen
+covar_fact=""
+covar_num=""
+chr=all  ##for multiple chr use chr=2,3,5,8,19 or chr=all
 
-mkdir -p $OutDir
+echo "Scritp directory: "$SCRIPTDIR
+echo "Input directory: "$InDir
+echo "Output directory: "$OutDir
+echo "Input and Output files prefix: "$FilePrefix
+echo "Factor covariates: "$covar_fact
+echo "Numeric covariates: "$covar_num
+echo "Chromosome: "$chr
+echo "############################################################"
+echo ""
 
-module load R
+mkdir -p $OutDir/${FilePrefix}
 
-for i in {1..22}
+IFS=',' read -r -a array <<< "$chr"
+
+if [ $chr == all ]
+then
+  array=($(seq 1 1 22))  ## seq FIRST STEP LAST
+fi
+
+for i in "${array[@]}"
 do
-  echo "Running chr${i}..."
-  plink --bfile ${InDir}/${FilePrefix} --recodeA --chr $i --out ${InDir}/${FilePrefix}_chr${i}
+  if [ ! -f ${OutDir}/${FilePrefix}/${FilePrefix}.chr${i}.raw ]
+  then
+    echo "Running chr ${i}..."
+    plink --bfile ${InDir}/${FilePrefix} --recodeA --chr $i --out ${OutDir}/${FilePrefix}/${FilePrefix}.chr${i}
+    echo "#########################################################################################"
+  fi
 done
 
-gcta64 --bfile ${InDir}/${FilePrefix} --make-grm-bin --out ${InDir}/${FilePrefix} --thread-num 16
-gcta64 --grm ${InDir}/${FilePrefix} --pca --out ${InDir}/${FilePrefix}
+if [ ! -f ${OutDir}/${FilePrefix}/${FilePrefix}.eigenvec ]
+then
+  gcta64 --bfile ${InDir}/${FilePrefix} --make-grm-bin --out ${OutDir}/${FilePrefix}/${FilePrefix} --thread-num 16
+  gcta64 --grm ${OutDir}/${FilePrefix}/${FilePrefix} --pca --out ${OutDir}/${FilePrefix}/${FilePrefix}
+fi
 
-Rscript ${SCRIPTDIR}/matrixQTL_eQTL_PrepareData.r $InDir $OutDir $covar_fact $covar_num $FilePrefix 
+Rscript ${SCRIPTDIR}/matrixQTL_eQTL_PrepareData.r $InDir $OutDir/${FilePrefix} "$covar_fact" "$covar_num" "$FilePrefix" $chr
 
 
 echo Job finished:
