@@ -226,8 +226,8 @@ if(total.common.snps > 0){
       log_$SNPs[i] <- paste(unique(result.coloc$results$snp),collapse=',')
       log_$nSNPs[i] <- length(unique(result.coloc$results$snp))
       
-      if(use.permut & any(log_$PP.H0.abf > p.threshold, log_$PP.H1.abf > p.threshold, log_$PP.H2.abf > p.threshold, 
-                          log_$PP.H3.abf > p.threshold, log_$PP.H4.abf > p.threshold, log_$sum.H3.H4 > p.threshold)){
+      if(use.permut & any(log_$PP.H0.abf[i] > p.threshold, log_$PP.H1.abf[i] > p.threshold, log_$PP.H2.abf[i] > p.threshold, 
+                          log_$PP.H3.abf[i] > p.threshold, log_$PP.H4.abf[i] > p.threshold, log_$sum.H3.H4[i] > p.threshold)){
         cat("Generating random regions...\n")
         loci.permut <- permutation(locus.snp = loci$SNP[i],locus.start = loci$START[i],locus.end = loci$END[i], LD = LD,
                                    LD.threshold = LD.threshold,
