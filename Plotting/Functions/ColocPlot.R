@@ -1,6 +1,7 @@
 ##############################################################
 
 ##   Reference:  https://github.com/RitchieLab/eQTpLot
+##               https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00267-6  
 
 ##############################################################
 
@@ -50,7 +51,7 @@ combine_data <- function(GWAS.df, QTL.df, Genes.df, gene, trait, GWAS.SigPvalue,
 }
 ##########################################################################################################
 
-plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="", GWAS.SigPvalue=1e-5, QTL.SigPvalue=1e-5, 
+plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="", with.legend = T ,GWAS.SigPvalue=1e-5, QTL.SigPvalue=1e-5, 
                        rangebp=5e+5 , gbuild="hg19", congruence=F, Return.CSV=F){
   suppressMessages(library(ggplot2))
   suppressMessages(library(biomaRt))
@@ -144,12 +145,16 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
       ggplot2::scale_shape_manual("GWAS Direction of Effect", values = c(Negative = 25, Positive = 24), na.value = 22) + 
       ggplot2::guides(alpha = "none", size = guide_legend("QTL Normalized Effect Size", override.aes = list(shape = 24, color = "black", fill = "grey"), title.position = "top", order = 2), 
                       shape = guide_legend(title.position = "top", direction = "vertical", order = 1, override.aes = list(size = 3, fill = "grey"))) + 
-      ggplot2::theme(legend.direction = "horizontal", legend.key = element_rect(fill = NA, colour = NA, linewidth = 0.25)) + 
+      #ggplot2::theme(legend.direction = "horizontal", legend.key = element_rect(fill = NA, colour = NA, linewidth = 0.25)) + 
       ggplot2::geom_vline(xintercept = Genes.df$start[Genes.df$gene %in% gene], linetype = "twodash", color = "lightblue4", linewidth = 0.2) +
       ggplot2::geom_hline(yintercept = -log10(GWAS.SigPvalue), linetype = "solid", color = "red", linewidth = 0.5) +
       ggrepel::geom_text_repel(data = text_data,aes(x=x,y=y,label=cpg),nudge_x = -5,nudge_y = 0.9,colour="blue", angle=90) +
       ggplot2::theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) + 
       ggplot2::theme(plot.margin = unit(c(0, 1, -0.8, 0), "cm"),title = element_text(size = 10))
+    
+    if(!with.legend){
+      p1 <- p1+theme(legend.position = "none")
+    }
     
     if (congruence == TRUE) {
       if (Congruentdata == TRUE) {
@@ -318,6 +323,7 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
       patchwork::plot_annotation(tag_levels = "A", tag_suffix = ".") & theme(plot.tag = element_text(size = 18), text = element_text(size = 12))
     
     p1 <- p1 + genetracks + patchwork::plot_spacer() + patchwork::plot_layout(ncol = 1, height = c(4, 2, 0.1))
+    
     return(list(plot.merged = p4, plot.coloc=p1,plot.cor=p3,plot.enrich=p2)) 
     
   }else{ #Return.CSV = True
@@ -360,5 +366,3 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
   }
   
 }
-
-
