@@ -1,5 +1,4 @@
-Module.Membership.Plot <- function(net.colors, expr.mat, trait, modules, size.threshold,soft.power, 
-                                   return.members=F,plot.title=NA,selected.genes=NA){
+Module.Membership.Plot <- function(net.colors, expr.mat, trait, modules, size.threshold,soft.power,plot.title=NA,selected.genes=NA){
   suppressMessages(library(WGCNA))
   suppressMessages(library(ggplot2))
   
@@ -29,8 +28,12 @@ Module.Membership.Plot <- function(net.colors, expr.mat, trait, modules, size.th
   names(geneTraitSignificance) = names(trait)
   names(GSPvalue) = names(trait)
   
-  result <- vector(mode = "list",length = length(modules))
-  names(result) <- modules
+  Plots <- vector(mode = "list",length = length(modules))
+  Corrs <- data.frame(Module=vector(mode = "character",length = length(modules)),
+                      Size=vector(mode = "character",length = length(modules)),
+                      Cor=vector(mode = "character",length = length(modules)),
+                      Pvalue=vector(mode = "character",length = length(modules)))
+  names(Plots) <- modules
   for (i in 1:length(modules)) {
     moduleGenes = (net.colors==modules[i])
     
@@ -59,15 +62,11 @@ Module.Membership.Plot <- function(net.colors, expr.mat, trait, modules, size.th
       p <- p + geom_point(data=plot.data[plot.data$ID %in% selected.genes,],
                           pch=21, fill="blue", size=4, colour="blue", stroke=1)
     }
-    
-    if(return.members){
-      m = data.frame(ID=names(net.colors[moduleGenes]))
-      result[[i]]$Plot <- p
-      result[[i]]$Members <- m
-    }else{
-      result[[i]] <- p
-    }
+    Corrs$Module[i] <- modules[i]
+    Corrs$Size[i] <- length(net.colors[net.colors==modules[i]])
+    Corrs$Cor[i] <- c$estimate
+    Corrs$Pvalue[i] <- c$p.value
+    Plots[[i]] <- p
   }
-  return(result)
+  return(list(Plots = Plots , Cor.test = Corrs))
 }
-
