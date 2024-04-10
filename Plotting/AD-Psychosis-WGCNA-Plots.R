@@ -1,4 +1,3 @@
-setwd("C:/Users/mk693/OneDrive - University of Exeter/Desktop/2021/NIH/Brain EWAS Paper")
 library(vroom)
 library(stringr)
 library(ggplot2)
