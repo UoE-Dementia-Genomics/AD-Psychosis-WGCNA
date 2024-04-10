@@ -136,7 +136,7 @@ preserv.plot.med.rank <- preserv.plot$Plot.Med.Rank
 preserv.plot.z.summary <- preserv.plot$Plot.Z.Summary
 
 #####################################################################
-tiff(filename = "WGCNA/March2024/Results/Figs/Fig2.WGCNA.darkgreen.tiff",units = "in",height = 10,width = 12,res = 500)
+tiff(filename = "./Fig2.WGCNA.darkgreen.tiff",units = "in",height = 10,width = 12,res = 500)
 ggarrange(preserv.plot.z.summary, preserv.plot.med.rank,merged.box.plot, merged.mm.plot, nrow = 2,ncol = 2,labels = c("A","B","C","D"))
 graphics.off()
 
@@ -169,7 +169,7 @@ GO.KEGG.Plot <- ggarrange(plot.go.bp,plot.go.mf,plot.go.cc,plot.kegg,labels = c(
 EWC_ <- ggarrange(blankPlot,ewc.plot,blankPlot,nrow = 1,ncol = 3,labels = c("","F",""), widths = c(0.2,1,0.2))
 GO.KEGG.EWC <- ggarrange(GO.KEGG.Plot,EWC_,nrow = 2, ncol = 1,heights = c(1.5,1))
 
-tiff(filename = "WGCNA/March2024/Results/Figs and Tables/Fig3.PPI.enrichment.darkred.tif",units = "in",height = 10,width = 20,res = 500)
+tiff(filename = "./Fig3.PPI.enrichment.darkred.tif",units = "in",height = 10,width = 20,res = 500)
 ggarrange(GO.KEGG.EWC,plot.ppi,labels = c("","E"),nrow = 1,ncol = 2, heights = c(1.5,2),widths = c(1.5,2))
 graphics.off()
 
@@ -200,7 +200,7 @@ result <- plot.coloc(GWAS.df = gwas.EA,QTL.df = coloc.qtl,Genes.df = coloc.cpg,g
 
 plot.EA1 <- result$plot.coloc
 
-tiff(filename = "WGCNA/March2024/Results/Figs and Tables/Fig4.darkgreen.Coloc.tif",units = "in",height = 14,width = 25,res = 500)
+tiff(filename = "./Fig4.darkgreen.Coloc.tif",units = "in",height = 14,width = 25,res = 500)
 ggarrange(ggarrange(plot.scz1,plot.scz2,labels = c("A","B"),nrow = 1 , ncol = 2 , widths = c(0.85,1)),ggarrange(plot.scz3,plot.EA1,blankPlot,labels = c("C","D",""),nrow = 1 , ncol = 3 , widths = c(1,1,0.18)),nrow = 2,ncol = 1)
 graphics.off()
 
@@ -212,7 +212,7 @@ cor.plots <- methylation.expression.corr(data.methylation = beta.pitts.regressed
             phenotype = pheno.pitts, trait = "Psychosis", trait.labels = c("AD-P","AD+P"), return.csv = return.csv)
 if(return.csv){
   results.csv <- cor.plots$cpg.gene.list
-  write.csv(results.csv,file = "WGCNA/March2024/Results/Figs/Fig5.darkgreen.Methyl-Expr.Corr.spearman.regressed.csv", row.names = F)
+  write.csv(results.csv,file = "./darkgreen.Methyl-Expr.Corr.spearman.regressed.csv", row.names = F)
   cor.plots <- cor.plots$plots
 }
 ctd <- readRDS(ctd.file)
@@ -220,7 +220,7 @@ ARMC3 <- EWCE.Plot.ctd(ctd = ctd , genes = "ARMC3",metric = "mean_exp",level =1)
 SPINT2 <- EWCE.Plot.ctd(ctd = ctd , genes = "SPINT2",metric = "mean_exp",level =1)
 PNPLA7 <- EWCE.Plot.ctd(ctd = ctd , genes = "PNPLA7",metric = "mean_exp",level =1)
 
-tiff(filename = "WGCNA/March2024/Results/Figs and Tables/Fig5.darkgreen.Methyl-Expr.Corr.Pearson.regressed.tif",units = "in",height = 10,width = 18,res = 500)
+tiff(filename = "./Fig5.darkgreen.Methyl-Expr.Corr.Pearson.regressed.tif",units = "in",height = 10,width = 18,res = 500)
 ggarrange(ggarrange(cor.plots[[1]]$methyl,cor.plots[[1]]$expr,cor.plots[[1]]$corr,
           cor.plots[[2]]$methyl,cor.plots[[2]]$expr,cor.plots[[2]]$corr,
           cor.plots[[3]]$methyl,cor.plots[[3]]$expr,cor.plots[[3]]$corr,
@@ -237,7 +237,7 @@ p.soft <- soft.power.plot(soft.data = soft.power.data,select.pow = 3)
 p.scale.free <- p.soft$p.scale.free
 p.mean.connect <- p.soft$p.mean.connect
 
-tiff(filename = "WGCNA.Paper/Figures/SuppFig1.dendrogram.tif",units = "in",height = 15,width = 22,res = 500)
+tiff(filename = "./SuppFig1.dendrogram.tif",units = "in",height = 15,width = 22,res = 500)
 ggarrange(p.dend , ggarrange(blankPlot,p.scale.free , p.mean.connect ,blankPlot, nrow = 1 , ncol = 4, labels = c("","B","C","")) , 
           nrow = 2 , ncol = 1, heights = c(2,1),labels =c("A","") )
 graphics.off()
@@ -261,6 +261,6 @@ p5 <- merged.box.plot$greenyellow + mm.plots$Plots$greenyellow+ plot_annotation(
 p6 <- merged.box.plot$darkgreen + mm.plots$Plots$darkgreen+ plot_annotation(title = "darkgreen")+
   plot_layout(guides = "collect")& theme(legend.position = 'non')
 
-tiff(filename = "WGCNA/March2024/Results/Figs/SuppFig2.other.modules.tif",units = "in",height = 14,width = 18,res = 500)
+tiff(filename = "./SuppFig2.other.modules.tif",units = "in",height = 14,width = 18,res = 500)
 ggarrange(p1,p2,p3,p4,p5,p6,nrow = 3,ncol = 2,common.legend = T)
 graphics.off()
