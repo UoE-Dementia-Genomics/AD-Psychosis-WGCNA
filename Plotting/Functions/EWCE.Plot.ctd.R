@@ -15,20 +15,21 @@ EWCE.Plot.ctd <- function (ctd, genes, level = 1, metric = "mean_exp") {
   metric <- stringr::str_to_sentence(metric)
   mat <- as.matrix(ctd[[level]][[tolower(metric)]])
   genes <- genes[genes %in% rownames(mat)]
-  if(length(genes) > 1)
+  if(length(genes) > 1){
     plot_data <- reshape2::melt(mat[genes, ], id.vars = "genes")
-  else{
+  }else{
     plot_data <- reshape2::melt(mat[genes, ], id.vars = "genes")
     plot_data$var1 <- genes
     plot_data$var2 <- row.names(plot_data)
     plot_data <- plot_data[,c(2,3,1)]
   }
-  colnames(plot_data) <- c("Gene", "Celltype", metric)
-  gp <- ggplot(plot_data, aes_string(x = "Celltype", y = metric, fill = metric)) + 
+  colnames(plot_data) <- c("Gene", "Celltype", "metric")
+  gp <- ggplot(plot_data, aes(x = reorder(Celltype,+metric), y = metric, fill = metric)) + 
     scale_fill_gradient(low = "blue", high = "red",name = y.lab) + 
     geom_bar(stat = "identity") + 
     theme_bw() + 
-    ylab(y.lab) 
+    ylab(y.lab) +
+    xlab("Celltype")
   
   if(length(genes) > 1)
     gp <- gp + facet_grid(Gene ~ .)
@@ -37,7 +38,7 @@ EWCE.Plot.ctd <- function (ctd, genes, level = 1, metric = "mean_exp") {
   
   gp <- gp +
         theme(axis.text.x = element_text(angle = 45,  hjust = 1), strip.background = element_rect(fill = "white"), 
-              strip.text = element_text(color = "black"),plot.title = element_text(hjust = 0.5))
+              strip.text = element_text(color = "black"),plot.title = element_text(hjust = 0.5)) + coord_flip()
   if (metric == "Specificity") {
     gp <- gp + scale_y_continuous(breaks = c(0, 0.5, 1), 
                                   limits = c(0, 1))
