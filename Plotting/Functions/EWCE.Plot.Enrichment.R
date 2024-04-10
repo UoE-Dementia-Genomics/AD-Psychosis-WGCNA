@@ -1,4 +1,4 @@
-EWCE.Plot <- function(EWCE.result, q.threshold=0.05, y.lab="",x.lab="",plot.title=""){
+EWCE.Plot.Enrichment <- function(EWCE.result, q.threshold=0.05, y.lab="",x.lab="",plot.title=""){
   library(ggplot2)
   ast_q <- rep("", dim(EWCE.result)[1])
   ast_q[EWCE.result$q < q.threshold] <- "*"
@@ -10,7 +10,7 @@ EWCE.Plot <- function(EWCE.result, q.threshold=0.05, y.lab="",x.lab="",plot.titl
   if(y.lab==""){
     y.lab="Std.Devs. from the mean"
   }
-  p <- ggplot(data = EWCE.result , aes(x=CellType , y=abs_sd , fill=abs_sd)) + 
+  p <- ggplot(data = EWCE.result , aes(x=reorder(CellType, +abs_sd) , y=abs_sd , fill=abs_sd)) + 
     geom_bar(stat = "identity") + 
     ylab(y.lab)+
     xlab(x.lab)+
@@ -20,6 +20,7 @@ EWCE.Plot <- function(EWCE.result, q.threshold=0.05, y.lab="",x.lab="",plot.titl
     theme_bw() +
     theme(legend.position = "none", axis.text.x = element_text(angle = 45,  hjust = 1)) + 
     scale_y_continuous(limits = c(-0.2 , upperLim+1))
+  p <- p+ coord_flip()
   
   return(p)
 }
