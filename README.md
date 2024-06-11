@@ -1,4 +1,4 @@
-# AD-Psychosis-WGCNA
+# A brain DNA co-methylation network analysis of psychosis in Alzheimer’s disease
 The presence of psychosis in Alzheimer’s disease is suggested to be associated with distinct molecular and neuropathological profiles in the brain. 
 We assessed DNA methylation in the prefrontal cortex in two cohorts using the EPIC array. Weighted gene correlation network analysis identified modules of co-methylated genes, with subsequent gene ontology and cell-type enrichment analysis. Genetic data was integrated to identify methylation quantitative trait loci, which were co-localized with GWAS for related traits. 
 We identified six modules of co-methylated loci associated with psychosis in our discovery cohort, with one replicated in an independent cohort and enriched for synaptic pathways and in excitatory and inhibitory neurons. Methylation quantitative trait loci in this module co-localized with variants associated with schizophrenia and educational attainment. 
