@@ -8,7 +8,7 @@
 combine_data <- function(GWAS.df, QTL.df, Genes.df, gene, trait, GWAS.SigPvalue, QTL.SigPvalue, 
                          rangebp , gbuild){
  
-  QTL.data <- QTL.df[which(QTL.df$gene %in% gene & QTL.df$pvalue.qtl < QTL.SigPvalue & !(is.na(QTL.df$beta.qtl)) & !(is.na(QTL.df$pvalue.qtl))), ]
+  QTL.data <- as.data.frame(QTL.df[which(QTL.df$gene %in% gene & QTL.df$pvalue.qtl < QTL.SigPvalue & !(is.na(QTL.df$beta.qtl)) & !(is.na(QTL.df$pvalue.qtl))), ])
   if (dim(QTL.data)[1] == 0){ 
     stop("QTL.df does not have any data for the gene ", paste(gene), " meeting your QTL.SigPvalue threshold")
   }
@@ -231,13 +231,13 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
         if(nrow(df1) >= 3){
           pearson.congruent <- cor.test(df1$NeglogQTLpValue,df1$Neglog10pvalue_GWAS,method = "pearson")
         }else{
-          print(paste("Not enough data to compute pearson correlation of gene",gene[i],"in Congruent QTLs"))
+          print(paste("Not enough data to compute pearson correlation in Congruent QTLs"))
           pearson.congruent <- list(estimate = 0,p.value=1)
         }
         if(nrow(df2) >= 3){
           pearson.Incongruent <- cor.test(df2$NeglogQTLpValue,df2$Neglog10pvalue_GWAS,method = "pearson")
         }else{
-          print(paste("Not enough data to compute pearson correlation of gene",gene[i],"in Incongruent QTLs"))
+          print(paste("Not enough data to compute pearson correlation in Incongruent QTLs"))
           pearson.Incongruent <- list(estimate = 0,p.value=1)
         }
         
@@ -264,7 +264,7 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
         if(nrow(df1) >= 3){
           pearson.congruent <- cor.test(df1$NeglogQTLpValue,df1$Neglog10pvalue_GWAS,method = "pearson")
         }else{
-          print(paste("Not enough data to compute pearson correlation of gene",gene[i],"in Congruent QTLs"))
+          print(paste("Not enough data to compute pearson correlation in Congruent QTLs"))
           pearson.congruent <- list(estimate = 0,p.value=1)
         }
         
@@ -285,7 +285,7 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
         if(nrow(df2) >= 3){
           pearson.Incongruent <- cor.test(df2$NeglogQTLpValue,df2$Neglog10pvalue_GWAS,method = "pearson")
         }else{
-          print(paste("Not enough data to compute pearson correlation of gene",gene[i],"in Incongruent QTLs"))
+          print(paste("Not enough data to compute pearson correlation in Incongruent QTLs"))
           pearson.Incongruent <- list(estimate = 0,p.value=1)
         }
         
@@ -307,7 +307,7 @@ plot.coloc <- function(GWAS.df, QTL.df, Genes.df, gene, trait="",coloc.title="",
       if(nrow(df) >= 3){
         pearson.all <- cor.test(df$NeglogQTLpValue,df$Neglog10pvalue_GWAS, method = "pearson")
       }else{
-        print(paste("Not enough data to compute pearson correlation of gene",gene[i],"in all QTLs"))
+        print(paste("Not enough data to compute pearson correlation in all QTLs"))
         pearson.all <- list(estimate = 0,p.value=1)
       }
       
